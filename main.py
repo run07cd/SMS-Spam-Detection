@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 
 DATA_URL = "https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip"
@@ -51,16 +51,30 @@ def main():
     model.fit(X_train, y_train)
 
     predictions = model.predict(X_test)
-    print("Accuracy:", round(accuracy_score(y_test, predictions) * 100, 2), "%")
-    print(classification_report(y_test, predictions, zero_division=0))
+    print("Test accuracy:", round(accuracy_score(y_test, predictions) * 100, 2), "%")
+    print("\nClassification report:")
+    print(classification_report(y_test, predictions, labels=["ham", "spam"], zero_division=0))
+    print("Confusion matrix (rows = actual, columns = predicted; ham, spam):")
+    print(confusion_matrix(y_test, predictions, labels=["ham", "spam"]))
 
     examples = [
         "Congratulations! You have won a free prize. Claim now.",
         "Hi, are we still meeting after class today?",
     ]
+    print("\nExample messages:")
     for message, prediction in zip(examples, model.predict(examples)):
-        print(f"\nMessage: {message}")
+        print(f"Message: {message}")
         print("Prediction:", prediction)
+
+    print("\nTry your own message (leave blank to skip).")
+    try:
+        user_message = input("Message: ").strip()
+    except EOFError:
+        user_message = ""
+    if user_message:
+        prediction = model.predict([user_message])[0]
+        print("Prediction:", prediction)
+        print("Reminder: this model can make mistakes; do not rely on it alone to judge messages.")
 
 
 if __name__ == "__main__":
